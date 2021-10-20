@@ -27,7 +27,7 @@ Using the Coveo Search API the content can be accessed from any application. Tra
 * Sent proper Analytics events to the Analytics API (submit and click events)
 * Provide Analytics context from which channel the search was coming from
 * Use commands, shortcuts and modal windows within Slack
-* Code [github](https://github.com/coveo-labs/coveo-slack-frontend-integration)
+* Code [github](https://github.com/coveo-labs/coveo-slack-integration)
 
 ## Architecture
 The Slack Application is installed inside the Slack environment. The Slack Application communicates through http requests with our Node.js application. The Node.js application is hosted on a Amazon AWS Lambda function, which is exposed using the Amazon API Gateway. Our Lambda function communicates with a Amazon DynamoDB for our searchToken cache. Executes searches to the Coveo Search API and writes analytics data using the Coveo Analytics API.
