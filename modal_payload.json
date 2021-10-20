@@ -1,0 +1,133 @@
+{
+	"type": "modal",
+	"title": {
+		"type": "plain_text",
+		"text": "Coveo Search",
+		"emoji": true
+	},
+	"submit": {
+		"type": "plain_text",
+		"text": "Search",
+		"emoji": true
+	},
+	"close": {
+		"type": "plain_text",
+		"text": "Cancel",
+		"emoji": true
+	},
+	"blocks": [
+		{
+			"type": "input",
+			"block_id": "search_input",
+			"element": {
+				"action_id": "search_input",
+				"type": "external_select",
+				"placeholder": {
+					"type": "plain_text",
+					"text": "Keywords"
+				},
+				"min_query_length": 3
+			},
+			"label": {
+				"type": "plain_text",
+				"text": ":search: Search for:",
+				"emoji": true
+			}
+		},
+		{
+			"type": "section",
+			"block_id": "facet_section",
+			"text": {
+				"type": "mrkdwn",
+				"text": ":file_cabinet: Filters"
+			},
+			"accessory": {
+				"action_id": "facet_input",
+				"type": "multi_static_select",
+				"placeholder": {
+					"type": "plain_text",
+					"text": "Select items"
+				},
+				"option_groups": [
+					{
+						"label": {
+							"type": "plain_text",
+							"text": "Group 1"
+						},
+						"options": [
+							{
+								"text": {
+									"type": "plain_text",
+									"text": "Wim"
+								},
+								"value": "value-0"
+							},
+							{
+								"text": {
+									"type": "plain_text",
+									"text": "Annie"
+								},
+								"value": "value-1"
+							},
+							{
+								"text": {
+									"type": "plain_text",
+									"text": "Rob"
+								},
+								"value": "value-2"
+							}
+						]
+					},
+					{
+						"label": {
+							"type": "plain_text",
+							"text": "Group 2"
+						},
+						"options": [
+							{
+								"text": {
+									"type": "plain_text",
+									"text": "Wim"
+								},
+								"value": "value-01"
+							},
+							{
+								"text": {
+									"type": "plain_text",
+									"text": "Annie"
+								},
+								"value": "value-11"
+							},
+							{
+								"text": {
+									"type": "plain_text",
+									"text": "Rob"
+								},
+								"value": "value-21"
+							}
+						]
+					}
+				]
+			}
+		},
+		{
+			"type": "divider"
+		},
+		{
+			"type": "section",
+			"block_id": "results_header_section",
+			"text": {
+				"type": "mrkdwn",
+				"text": "Found: Results *10* of *100*"
+			}
+		},
+		{
+			"type": "section",
+			"block_id": "results_section",
+			"text": {
+				"type": "mrkdwn",
+				"text": "This is a mrkdwn section block :ghost: *this is bold* and <https://google.com|this is a link>\nThis is a mrkdwn section block :ghost: *this is bold* and <https://google.com|this is a link>\nThis is a mrkdwn section block :ghost: *this is bold* and <https://google.com|this is a link>\nThis is a mrkdwn section block :ghost: *this is bold* and <https://google.com|this is a link>"
+			}
+		}
+	]
+}

@@ -1,0 +1,15 @@
+service: coveo-slack-integration
+frameworkVersion: '2'
+provider:
+  name: aws
+  runtime: nodejs12.x  # could be changed to v14 (current LTS) or v16 (current Latest)
+  environment:
+functions:
+  slack:
+    handler: index.handler
+    events:
+      - http:
+          path: slack/events
+          method: post
+plugins:
+  - serverless-offline

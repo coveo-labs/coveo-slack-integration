@@ -1,0 +1,28 @@
+{
+  "name": "coveo-slack-integration",
+  "version": "1.0.0",
+  "description": "Howto integrate Coveo Search into Slack",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Wim Nijmeijer",
+  "license": "ISC",
+  "dependencies": {
+    "@slack/bolt": "^3.6.0",
+    "dotenv-safe": "^8.2.0",
+    "request": "^2.88.2",
+    "request-promise": "^4.2.6"
+  },
+  "devDependencies": {
+    "serverless-offline": "^8.2.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/coveo-labs/coveo-slack-frontend-application.git"
+  },
+  "bugs": {
+    "url": "https://github.com/coveo-labs/coveo-slack-frontend-application/issues"
+  },
+  "homepage": "https://github.com/coveo-labs/coveo-slack-frontend-application#readme"
+}

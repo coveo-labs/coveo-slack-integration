@@ -1,0 +1,11 @@
+node_modules
+json
+dist
+.git
+*.pyc
+*.log
+.vscode
+.env
+.serverless
+.yml
+settings.json
