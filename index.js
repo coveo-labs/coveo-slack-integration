@@ -14,8 +14,6 @@ const AWS = require("aws-sdk");
 const request = require('request-promise');
 //To get the .env file data for the environment variables
 require('dotenv-safe').config();
-//Setup a new receiver so we can use our own custom route (for the onClick event of results)
-const receiver = new ExpressReceiver({ signingSecret: process.env.SLACK_SIGNING_SECRET });
 const awsLambdaReceiver = new AwsLambdaReceiver({
   signingSecret: process.env.SLACK_SIGNING_SECRET,
 });
@@ -26,15 +24,111 @@ AWS.config.update({ region: process.env.COVEO_AWS_REGION });
 const tableName = "awsSlackCache";
 const docClient = new AWS.DynamoDB.DocumentClient();
 
-//The url to point to our application which is used to open a document so that we can sent an analytics event
-const openClickUrl = process.env.COVEO_AWS_ENDPOINT + '/opendocument';
+//Custom store for installation
+const myInstallationStore = {
+  //Get installation from DynamoDB
+  fetchInstallation: async (query) => {
+    console.log('Fetching Installation');
+    let token;
+    const enterpriseId = query.enterpriseId ? query.enterpriseId : 'none';
+    const teamId = query.teamId ? query.teamId : 'none';
+    const key = query.isEnterpriseInstall ? `${enterpriseId}-none` : `${enterpriseId}-${teamId}`;
+    const params = {
+      TableName: tableName,
+      Key: {
+        "user": key
+      }
+    };
+    try {
+      const result = await docClient.get(params).promise();
+      //We have a valid installation
+      token = JSON.parse(result.Item['token'].toString('utf-8'));
+    } catch (error) {
+      console.error(error);
+      token = undefined;
+    }
+    return token;
+  },
+  //Put installation in DynamoDB
+  storeInstallation: async (installation) => {
+    console.log('Storing Installation');
+    const enterpriseId = installation.enterprise ? installation.enterprise.id : 'none';
+    const teamId = installation.team ? installation.team.id : 'none';
+
+    const params = {
+      TableName: tableName,
+      Item: {
+        "user": `${enterpriseId}-${teamId}`,
+        "token": JSON.stringify(installation)
+      }
+    };
+    try {
+      const result = await docClient.put(params).promise();
+      //console.log(result);
+    } catch (error) {
+      console.error(error);
+    }
+  }
+}
+
+// OAuth Flow
+const expressReceiver = new ExpressReceiver({
+  clientId: process.env.SLACK_CLIENT_ID,
+  clientSecret: process.env.SLACK_CLIENT_SECRET,
+  scopes: process.env.SLACK_SCOPES ? process.env.SLACK_SCOPES.split(',') : '',
+  stateSecret: 'my-state-secret',
+  installationStore: myInstallationStore,
+  stateVerification: false,
+  installerOptions: {
+    stateVerification: false,
+  }
+});
+
+const awsServerlessExpress = require('aws-serverless-express');
+const server = awsServerlessExpress.createServer(expressReceiver.app);
+module.exports.oauthHandler = (event, context) => {
+  awsServerlessExpress.proxy(server, event, context);
+}
 
 const app = new App({
   receiver: awsLambdaReceiver,
-  token: process.env.SLACK_BOT_TOKEN,
+  //token: process.env.SLACK_BOT_TOKEN,
   //logLevel: LogLevel.DEBUG,
+  stateVerification: false,
+  installerOptions: {
+    stateVerification: false,
+  },
   signingSecret: process.env.SLACK_SIGNING_SECRET,
-  processBeforeResponse: true
+  processBeforeResponse: true,
+  authorize: async (source) => {
+    try {
+      const queryResult = await myInstallationStore.fetchInstallation(source);
+      if (queryResult === undefined) {
+        throw new Error('Failed fetching data from the Installation Store');
+      }
+
+      const authorizeResult = {};
+      authorizeResult.userToken = queryResult.user.token;
+      if (queryResult.team !== undefined) {
+        authorizeResult.teamId = queryResult.team.id;
+      } else if (source.teamId !== undefined) {
+        authorizeResult.teamId = source.teamId;
+      }
+      if (queryResult.enterprise !== undefined) {
+        authorizeResult.enterpriseId = queryResult.enterprise.id;
+      } else if (source.enterpriseId !== undefined) {
+        authorizeResult.enterpriseId = source.enterpriseId;
+      }
+      if (queryResult.bot !== undefined) {
+        authorizeResult.botToken = queryResult.bot.token;
+        authorizeResult.botId = queryResult.bot.id;
+        authorizeResult.botUserId = queryResult.bot.userId;
+      }
+      return authorizeResult;
+    } catch (error) {
+      throw new Error(error.message);
+    }
+  }
 });
 
 const config = {
@@ -147,7 +241,6 @@ const getNewSearchToken = async (userName) => {
 //Do we have a valid searchtoken in the current conversation
 //If not present, get it from the endpoint
 const checkSearchToken = async (context, visitor, user) => {
-  let newToken = false;
   let token = '';
   //Get Token from dynamoDB
   token = await getTokenFromDynamoDB(visitor);
@@ -725,21 +818,6 @@ const submitAnalyticsOpen = async (searchUid, uri, urihash, sourceName, position
     });
 };
 
-module.exports.openhandler = async (req, res, callback) => {
-  //Submit the Analytics Request
-  // [JD] You could pass in req.queryStringParameters simply, and use ({searchUid, url, urihash, }) in the function definition (ust be mindful of url/uri)
-  await submitAnalyticsOpen(req.queryStringParameters.searchUid, req.queryStringParameters.url, req.queryStringParameters.urihash, req.queryStringParameters.source, req.queryStringParameters.position, req.queryStringParameters.title, req.queryStringParameters.visitor, req.queryStringParameters.token, req.queryStringParameters.ref, req.queryStringParameters.ch);
-  //Now open the original URL
-  const response = {
-    statusCode: '301',
-    headers: {
-      Location: req.queryStringParameters.url
-    },
-  };
-  callback(null, response);
-};
-
-
 // Handle the Lambda function event
 module.exports.handler = async (event, context, callback) => {
   console.log(event);
@@ -992,19 +1070,19 @@ const assembleResultsInBlocks = (blocksObj, coveoResults, addAttachment, visitor
       "type": "divider"
     };
     addMessageObj = {
-          "type": "button",
-          "text": {
-            "type": "plain_text",
-            "text": "Attach to message",
-            "emoji": true
-          },
-          "value": ClickUri,
-          "action_id": "attachToMessage"
-        };
+      "type": "button",
+      "text": {
+        "type": "plain_text",
+        "text": "Attach to message",
+        "emoji": true
+      },
+      "value": ClickUri,
+      "action_id": "attachToMessage"
+    };
 
     blocksObj.push(titleObj); // Adding the result title
     //Add Buttons when in shortcut modal
-    if (addAttachment) openObj.elements.push(addMessageObj); 
+    if (addAttachment) openObj.elements.push(addMessageObj);
     blocksObj.push(openObj); // Adding the open button
     if (excerptObj != undefined) blocksObj.push(excerptObj); // Adding the result excerpt
     if (resourceTypeObj != undefined) blocksObj.push(resourceTypeObj); // Adding the result resourceType

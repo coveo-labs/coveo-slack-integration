@@ -55,7 +55,7 @@ In order to have a single app covering multiple clients, you can use the followi
 ## Make it work
 
 ### Setup Coveo Platform
-The first thing we need to setup is the API key, used for the [impersonation](https://docs.coveo.com/en/1707/manage-an-organization/privilege-reference#search-impersonate-domain). *Store this key in a save environment and do not expose it!* In the provided example it is stored in the AWS Application in the `.env` file. You could also add it to all of your Slack URL's by using the query parameter `apiKey=YOUR_KEY`. Using the impersonation API key a [search token](https://docs.coveo.com/en/56) is created, which is used for searches and storing analytics data.
+The first thing we need to setup is the API key, used for the [impersonation](https://docs.coveo.com/en/1707/manage-an-organization/privilege-reference#search-impersonate-domain). *Store this key in a save environment and do not expose it!* In the provided example it is stored in the AWS Application in the `.env` file. Using the impersonation API key a [search token](https://docs.coveo.com/en/56) is created, which is used for searches and storing analytics data.
 
 We also need a [dimension](https://docs.coveo.com/en/1522/) to store our `channel` data. This `channel` data can then be used in Analytic reports.
 

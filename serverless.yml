@@ -5,6 +5,17 @@ provider:
   runtime: nodejs12.x  # could be changed to v14 (current LTS) or v16 (current Latest)
   environment:
 functions:
+  slackRedirectURI:
+    handler: index.oauthHandler
+    timeout: 12
+    events:
+      - http:
+          path: slack/oauth_redirect
+          method: get
+      - http:
+          path: slack/install
+          method: get
+          
   slack:
     handler: index.handler
     events:

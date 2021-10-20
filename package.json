@@ -10,6 +10,7 @@
   "license": "ISC",
   "dependencies": {
     "@slack/bolt": "^3.6.0",
+    "aws-serverless-express": "^3.4.0",
     "dotenv-safe": "^8.2.0",
     "request": "^2.88.2",
     "request-promise": "^4.2.6"

@@ -35,6 +35,8 @@ Requirements:
 
    Insert it only in the `.env` file (`COVEO_API_KEY`). Also put the `COVEO_ORG` in the `.env` file.
 
+   If you want to use those two variables in your Slack configuration. Add them as url parameters to your slack calls like: `?org=YOUR_ORG&apiKey=YOUR_API_KEY`.
+
 ### Create Channel dimension in Coveo platform
 
 To report on the Channel used in the requests, we need to add a [Dimension](https://docs.coveo.com/en/1522/).
@@ -98,7 +100,6 @@ Use script [./create_aws_database.cmd](./create_aws_database.cmd).
 | COVEO_FULL_SEARCH        | The url to point to the full search experience                                                                                   | https://www.coveo.com                                                                            |
 | COVEO_ENDPOINT           | The Coveo endpoint to execute searches against                                                                                   | https://platform.cloud.coveo.com                                                                 |
 | COVEO_ANALYTICS_ENDPOINT | The Coveo analytics endpoint to sent Search Analytics events to                                                                  | https://analytics.cloud.coveo.com                                                                |
-| COVEO_AWS_ENDPOINT       | The AWS endpoint to the API Gateway                                                                                              | https://hg0g.execute-api.us-east-1.amazonaws.com/prod                                            |
 | COVEO_AWS_REGION         | The region of your AWS installation                                                                                              | us-east-1                                                                                        |
 
 ### Host the NodeJs app
