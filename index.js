@@ -14,8 +14,6 @@ const AWS = require("aws-sdk");
 const request = require('request-promise');
 //To get the .env file data for the environment variables
 require('dotenv-safe').config();
-//Setup a new receiver so we can use our own custom route (for the onClick event of results)
-const receiver = new ExpressReceiver({ signingSecret: process.env.SLACK_SIGNING_SECRET });
 const awsLambdaReceiver = new AwsLambdaReceiver({
   signingSecret: process.env.SLACK_SIGNING_SECRET,
 });
@@ -25,9 +23,6 @@ const awsLambdaReceiver = new AwsLambdaReceiver({
 AWS.config.update({ region: process.env.COVEO_AWS_REGION });
 const tableName = "awsSlackCache";
 const docClient = new AWS.DynamoDB.DocumentClient();
-
-//The url to point to our application which is used to open a document so that we can sent an analytics event
-const openClickUrl = process.env.COVEO_AWS_ENDPOINT + '/opendocument';
 
 const app = new App({
   receiver: awsLambdaReceiver,
@@ -87,7 +82,6 @@ app.command('/search_for', async ({ command, ack, say, context, respond, payload
   const coveoResults = JSON.parse(coveoResultsJSON);
   // Submit Analytics - Search call
   await submitAnalyticsSearch(coveoResults, query, '', visitor, searchToken, "https://slack.com/" + command.channel_name, command.channel_name, username);
-  //console.log(JSON.stringify(coveoResults, null, 1));
   // Assemble Slack blocks
   blocksObj = getModalStartingBlocks(query, username);
   blocksObj = assembleResultsInBlocks(blocksObj, coveoResults, false, username, searchToken, coveoResults.searchUid, "https://slack.com/" + command.channel_name, command.channel_name);
@@ -147,7 +141,6 @@ const getNewSearchToken = async (userName) => {
 //Do we have a valid searchtoken in the current conversation
 //If not present, get it from the endpoint
 const checkSearchToken = async (context, visitor, user) => {
-  let newToken = false;
   let token = '';
   //Get Token from dynamoDB
   token = await getTokenFromDynamoDB(visitor);
@@ -894,7 +887,6 @@ const assembleResultsInBlocks = (blocksObj, coveoResults, addAttachment, visitor
     const titleHighlights = result.titleHighlights;
     let ClickUri = result.clickUri;
     //In order to track click Open analytics events we need to construct it using the /opendocument route
-    //ClickUri = openClickUrl + '?url=' + encodeURIComponent(result.clickUri);
     ClickUri = 'https://slack' + '?url=' + encodeURIComponent(result.clickUri);
     ClickUri += `&urihash=${result.raw.urihash}`;
     ClickUri += `&position=${index}`;
