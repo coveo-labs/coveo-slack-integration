@@ -273,7 +273,7 @@ app.action(config.slack.homeTabSearchBoxActionId, async ({ action, ack, body, cl
   console.log('SearchToken: ' + searchToken);
   //The searchToken will be attached to the private_metadata of the form
   let addAttachment = false;
-  await getResultsAndPublishSearchUI(query, aq, surface, triggerId, "false", body, client, searchToken, facets, visitor, addAttachment, username, "https://slack.com/" + channelname, channelname);
+  await getResultsAndPublishSearchUI(query, aq, surface, triggerId, "false", body, client, searchToken, facets, visitor, addAttachment, username, "https://slack.com/" + channelname, channelname, userid);
 
 });
 
@@ -525,7 +525,7 @@ app.command('/search_for_modal', async ({ command, ack, body, client, context, p
 
 });
 
-const getResultsAndPublishSearchUI = async (query, aq, surface, triggerId, modalUpdate, body, client, searchToken, facets, visitor, addAttachment, username, referrer, context) => {
+const getResultsAndPublishSearchUI = async (query, aq, surface, triggerId, modalUpdate, body, client, searchToken, facets, visitor, addAttachment, username, referrer, context, userid) => {
   // Call Coveo for results
   allDataInToken = searchToken.split(';');
   originalToken = searchToken;
@@ -566,7 +566,7 @@ const getResultsAndPublishSearchUI = async (query, aq, surface, triggerId, modal
       // Call views.publish with the built-in client
       const result = await client.views.publish({
         // Use the user ID associated with the event
-        user_id: username,
+        user_id: userid,
         view: {
           // Home tabs must be enabled in your app configuration page under "App Home"
           "type": "home",
