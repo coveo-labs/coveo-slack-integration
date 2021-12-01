@@ -42,9 +42,9 @@ To get a Search API token, we first need to call the [/token]( https://docs.cove
 
 <img src="../master/images/gettoken.png" width=600/>
 
-The [token returned by the search API]( https://docs.coveo.com/en/13) is then used to execute search results. The API key contains the current userId, based on that the security trimming of the search results is performed. 
+The [token returned by the search API]( https://docs.coveo.com/en/13) is then used to execute search queries. The API key contains the current userId, based on that the security trimming of the search results is performed. 
 
-To have a single instance covering multiple clients, you can use the following URL parameters when you add the URLs to your Slack application.
+To have a single instance covering multiple clients, add the following URL parameters to all your Slack URLs.
 
 | Name    | Contents                                                     | Example           |
 | ------- | ------------------------------------------------------------ | ----------------- |
